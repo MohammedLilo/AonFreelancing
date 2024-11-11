@@ -1,5 +1,6 @@
 
 using AonFreelancing.Contexts;
+using AonFreelancing.Enums;
 using AonFreelancing.Middlewares;
 using AonFreelancing.Models;
 using AonFreelancing.Services;
@@ -32,6 +33,9 @@ namespace AonFreelancing
             builder.Services.AddIdentity<User,ApplicationRole>()
                 .AddEntityFrameworkStores<MainAppContext>()
                 .AddDefaultTokenProviders();
+
+
+
             builder.Configuration.AddJsonFile("appsettings.json");
 
 
@@ -60,6 +64,14 @@ namespace AonFreelancing
 
 
             var app = builder.Build();
+            
+            //seed roles to the database
+            using (var serviceScope = app.Services.CreateScope())
+            {
+                var serviceProvider = serviceScope.ServiceProvider;
+                var roleManager = serviceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                SeedRoles(roleManager).GetAwaiter().GetResult();
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -80,5 +92,14 @@ namespace AonFreelancing
 
             app.Run();
         }
+
+        static async Task SeedRoles(RoleManager<ApplicationRole> roleManager)
+        {
+            int i = 1;
+            foreach (string roleName in Enum.GetNames(typeof(UserRoles)))
+                if (!await roleManager.RoleExistsAsync(roleName.ToString()))
+                    await roleManager.CreateAsync(new ApplicationRole() { Name = roleName, Id = i++ });  
+        }
+
     }
 }

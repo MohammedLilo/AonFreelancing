@@ -17,6 +17,27 @@ namespace AonFreelancing.Models
         // Has many projects, 1-m
         public List<Project>? Projects { get; set; }
   
+        public Client() { }
+        public Client(User user)
+        {
+            Id = user.Id;
+            AccessFailedCount = user.AccessFailedCount;
+            Email = user.Email;
+            EmailConfirmed = user.EmailConfirmed;
+            LockoutEnabled = user.LockoutEnabled;
+            LockoutEnd = user.LockoutEnd;
+            Name = user.Name;
+            NormalizedEmail = user.NormalizedEmail;
+            UserName = user.UserName;
+            NormalizedUserName = user.NormalizedUserName;
+            PhoneNumber = user.PhoneNumber;
+            PhoneNumberConfirmed = user.PhoneNumberConfirmed;
+            PasswordHash = user.PasswordHash;
+            ConcurrencyStamp = user.ConcurrencyStamp;
+            SecurityStamp = user.SecurityStamp;
+            TwoFactorEnabled = user.TwoFactorEnabled;
+            FullyRegistered = user.FullyRegistered;
+        }
 
         //public override void DisplayProfile()
         //{

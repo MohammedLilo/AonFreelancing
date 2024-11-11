@@ -15,5 +15,13 @@ namespace AonFreelancing.Models
         public DateTime ExpiresAt { get; set; }
         public bool IsUsed { get; set; }
 
+        public OTP() { }
+        public OTP(string phoneNumber, string code, int expireInMinutes)
+        {
+            Code = code;
+            PhoneNumber = phoneNumber;
+            CreatedDate = DateTime.Now;
+            ExpiresAt = DateTime.Now.AddMinutes(expireInMinutes);
+        }
     }
 }
