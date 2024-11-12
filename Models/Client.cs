@@ -20,10 +20,8 @@ namespace AonFreelancing.Models
 
         public Client() { }
         public Client(UserRegistrationRequest registrationRequest)
+        : base(registrationRequest)
         {
-            Email = registrationRequest.Email;
-            Name = registrationRequest.Name;
-            PhoneNumber = registrationRequest.PhoneNumber;
             CompanyName = registrationRequest.CompanyName;
         }
 

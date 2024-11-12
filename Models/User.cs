@@ -18,6 +18,7 @@ namespace AonFreelancing.Models
     public class User : IdentityUser<long>
     {
         public string Name { get; set; }
+        public string? About {  get; set; }
         public User() { }
         public User(UserRegistrationRequest request)
         {

@@ -36,7 +36,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
             var UserClient = await _userManager.FindByNameAsync(Username);
 
             Project p = new Project();
-            p.Title = project.Title;
+            p.Name = project.Title;
             p.Description = project.Description;
             p.ClientId = UserClient.Id;
             p.QualificationName = project.QualificationName;

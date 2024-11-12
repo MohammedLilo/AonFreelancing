@@ -8,13 +8,16 @@ namespace AonFreelancing.Models.DTOs
         public string Skills { get; set; }
     }
 
-    public class FreelancerRequestDTO : UserDTO
-    {
-        public string Skills { get; set; }
-    }
 
-    public class FreelancerResponseDTO : UserResponseDTO { 
-        public string? Skills { get; set; }
+    public class FreelancerProfileDTO : UserProfileDTO { 
       
+        public string? Skills { get; set; }
+
+        public FreelancerProfileDTO() { }
+        public FreelancerProfileDTO(Freelancer freelancer)
+        : base(freelancer)
+        {
+            Skills = freelancer.Skills;
+        }
     }
 }

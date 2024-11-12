@@ -16,10 +16,9 @@ namespace AonFreelancing.Models
 
         public Freelancer() { }
         public Freelancer(UserRegistrationRequest registrationRequest)
+        : base(registrationRequest)
         {
-            Email = registrationRequest.Email;
-            Name = registrationRequest.Name;
-            PhoneNumber = registrationRequest.PhoneNumber;
+
             Skills = registrationRequest.Skills;
         }
 

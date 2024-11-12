@@ -28,41 +28,21 @@ namespace AonFreelancing.Controllers.Mobile.v1
         [HttpGet("{id}/profile")]
         public async Task<IActionResult> GetProfileById([FromRoute] long id)
         {
-            var freelancerResponseDTO = await _mainAppContext.Users.OfType<Freelancer>()
+            var freelancerProfileDTO = await _mainAppContext.Users.OfType<Freelancer>()
                                                                 .Where(f => f.Id == id)
-                                                                .Select(f => new FreelancerResponseDTO
-                                                                {
-                                                                    Id = f.Id,
-                                                                    Name = f.Name,
-                                                                    Username = f.UserName,
-                                                                    PhoneNumber = f.PhoneNumber,
-                                                                    UserType = Constants.USER_TYPE_FREELANCER,
-                                                                    IsPhoneNumberVerified = f.PhoneNumberConfirmed,
-                                                                    Role = new RoleResponseDTO { Name = Constants.USER_TYPE_FREELANCER },
-                                                                    Skills = f.Skills,
-                                                                }).FirstOrDefaultAsync();
-            if (freelancerResponseDTO != null)
-                return Ok(CreateSuccessResponse(freelancerResponseDTO));
+                                                                .Select(f => new FreelancerProfileDTO(f))
+                                                                .FirstOrDefaultAsync();
+            if (freelancerProfileDTO != null)
+                return Ok(CreateSuccessResponse(freelancerProfileDTO));
 
 
-            var clientResponseDTO = await _mainAppContext.Users.OfType<Client>()
+            var clientProfileDTO = await _mainAppContext.Users.OfType<Client>()
                                                                 .Where(c => c.Id == id)
                                                                 .Include(c => c.Projects)
-                                                                .Select(c => new ClientResponseDTO
-                                                                {
-                                                                    Id = c.Id,
-                                                                    Name = c.Name,
-                                                                    Username = c.UserName,
-                                                                    PhoneNumber = c.PhoneNumber,
-                                                                    UserType = Constants.USER_TYPE_CLIENT,
-                                                                    IsPhoneNumberVerified = c.PhoneNumberConfirmed,
-                                                                    Role = new RoleResponseDTO { Name = Constants.USER_TYPE_CLIENT },
-                                                                    CompanyName = c.CompanyName,
-                                                                    Projects = c.Projects
-                                                                }).FirstOrDefaultAsync();
-
-            if (clientResponseDTO != null)
-                return Ok(CreateSuccessResponse(clientResponseDTO));
+                                                                .Select(c => new ClientProfileDTO(c))
+                                                                .FirstOrDefaultAsync();
+            if (clientProfileDTO != null)
+                return Ok(CreateSuccessResponse(clientProfileDTO));
 
             return NotFound(CreateErrorResponse(StatusCodes.Status404NotFound.ToString(), "User not found"));
         }

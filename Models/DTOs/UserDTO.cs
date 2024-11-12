@@ -29,16 +29,24 @@ namespace AonFreelancing.Models.DTOs
 
     }
 
-    public class UserResponseDTO
+    public class UserProfileDTO
     {
         public long Id { get; set; }
         public string Name { get; set; }
-
-        public string Username { get; set; }
         public string PhoneNumber { get; set; }
+        public string? Email {  get; set; }
+        public string? About {  get; set; }
+    
+    public UserProfileDTO() { }
+    public UserProfileDTO(User user) {
+        
+            Id = user.Id;
+            Name = user.Name;
+            PhoneNumber = user.PhoneNumber;
+            Email = user.Email;
+            About = user.About;
+        }
 
-        public bool IsPhoneNumberVerified { get; set; }
-        public string UserType { get; set; }
-        public RoleResponseDTO Role { get; set; }
+    
     }
 }

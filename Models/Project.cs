@@ -10,11 +10,10 @@ namespace AonFreelancing.Models
     {
 
         public int Id { get; set; }
-        [Required]
-        public string Title { get; set; }
 
-        [AllowNull]
-        public string Description { get; set; }
+        public string Name { get; set; }
+
+        public string? Description { get; set; }
 
         public long ClientId { get; set; }//FK
 
@@ -24,6 +23,10 @@ namespace AonFreelancing.Models
 
         public DateTime CreatedAt { get; set; }
 
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
+
         public string PriceType { get; set; }
 
         public int Duration { get; set; }
@@ -32,14 +35,10 @@ namespace AonFreelancing.Models
 
         public decimal Budget {  get; set; }
 
+        public long? FreelancerId { get; set; }
 
-
-        [AllowNull]
-        public long FreelancerId { get; set; }
-
-        [AllowNull]
         [ForeignKey("FreelancerId")]
-        public Freelancer Freelancer { get; set; }
+        public Freelancer? Freelancer { get; set; }
 
 
 
