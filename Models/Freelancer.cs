@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AonFreelancing.Models.Requests;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -14,25 +15,12 @@ namespace AonFreelancing.Models
         public string Skills { get; set; }
 
         public Freelancer() { }
-        public Freelancer(User user)
+        public Freelancer(UserRegistrationRequest registrationRequest)
         {
-            Id = user.Id;
-            AccessFailedCount = user.AccessFailedCount;
-            Email = user.Email;
-            EmailConfirmed = user.EmailConfirmed;
-            LockoutEnabled = user.LockoutEnabled;
-            LockoutEnd = user.LockoutEnd;
-            Name = user.Name;
-            NormalizedEmail = user.NormalizedEmail;
-            UserName = user.UserName;
-            NormalizedUserName = user.NormalizedUserName;
-            PhoneNumber = user.PhoneNumber;
-            PhoneNumberConfirmed = user.PhoneNumberConfirmed;
-            PasswordHash = user.PasswordHash;
-            ConcurrencyStamp = user.ConcurrencyStamp;
-            SecurityStamp = user.SecurityStamp;
-            TwoFactorEnabled = user.TwoFactorEnabled;
-            FullyRegistered = user.FullyRegistered;
+            Email = registrationRequest.Email;
+            Name = registrationRequest.Name;
+            PhoneNumber = registrationRequest.PhoneNumber;
+            Skills = registrationRequest.Skills;
         }
 
         //public override void DisplayProfile()

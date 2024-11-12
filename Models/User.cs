@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AonFreelancing.Interfaces;
+using AonFreelancing.Models.Requests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,12 @@ namespace AonFreelancing.Models
     public class User : IdentityUser<long>
     {
         public string Name { get; set; }
-        public bool FullyRegistered { get; set; }
+        public User() { }
+        public User(UserRegistrationRequest request)
+        {
+            Name = request.Name;
+            PhoneNumber = request.PhoneNumber;
+            Email = request.Email;
+        }
     }
 }

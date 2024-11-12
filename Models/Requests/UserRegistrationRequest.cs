@@ -6,7 +6,8 @@ namespace AonFreelancing.Models.Requests
 
     {
         [Required]
-        public long UserId {  get; set; }
+        [Length(14, 14)]
+        public string PhoneNumber { get; set; }
 
         [Required]
         [MinLength(2)]

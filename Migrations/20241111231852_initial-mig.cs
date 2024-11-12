@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AonFreelancing.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMig : Migration
+    public partial class initialmig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -41,7 +41,7 @@ namespace AonFreelancing.Migrations
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
                     SecurityStamp = table.Column<string>(type: "TEXT", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "TEXT", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: false),
                     PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
                     TwoFactorEnabled = table.Column<bool>(type: "INTEGER", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
@@ -51,6 +51,18 @@ namespace AonFreelancing.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TempUsers",
+                columns: table => new
+                {
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TempUsers", x => x.PhoneNumber);
                 });
 
             migrationBuilder.CreateTable(
@@ -217,6 +229,28 @@ namespace AonFreelancing.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "otps",
+                columns: table => new
+                {
+                    PhoneNumber = table.Column<string>(type: "TEXT", nullable: false),
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsUsed = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_otps", x => x.PhoneNumber);
+                    table.CheckConstraint("CK_CODE", "length([Code]) = 6");
+                    table.ForeignKey(
+                        name: "FK_otps_TempUsers_PhoneNumber",
+                        column: x => x.PhoneNumber,
+                        principalTable: "TempUsers",
+                        principalColumn: "PhoneNumber",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Projects",
                 columns: table => new
                 {
@@ -224,7 +258,13 @@ namespace AonFreelancing.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
-                    ClientId = table.Column<long>(type: "INTEGER", nullable: false)
+                    ClientId = table.Column<long>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    PriceType = table.Column<string>(type: "TEXT", nullable: false),
+                    Duration = table.Column<int>(type: "INTEGER", nullable: false),
+                    QualificationName = table.Column<string>(type: "TEXT", nullable: false),
+                    Budget = table.Column<decimal>(type: "TEXT", nullable: false),
+                    FreelancerId = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -233,6 +273,12 @@ namespace AonFreelancing.Migrations
                         name: "FK_Projects_Clients_ClientId",
                         column: x => x.ClientId,
                         principalTable: "Clients",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Projects_Freelancers_FreelancerId",
+                        column: x => x.FreelancerId,
+                        principalTable: "Freelancers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -269,15 +315,26 @@ namespace AonFreelancing.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
+                name: "IX_AspNetUsers_PhoneNumber",
                 table: "AspNetUsers",
-                column: "NormalizedUserName",
+                column: "PhoneNumber",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_ClientId",
                 table: "Projects",
                 column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Projects_FreelancerId",
+                table: "Projects",
+                column: "FreelancerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TempUsers_PhoneNumber",
+                table: "TempUsers",
+                column: "PhoneNumber",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -299,7 +356,7 @@ namespace AonFreelancing.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Freelancers");
+                name: "otps");
 
             migrationBuilder.DropTable(
                 name: "Projects");
@@ -311,7 +368,13 @@ namespace AonFreelancing.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "TempUsers");
+
+            migrationBuilder.DropTable(
                 name: "Clients");
+
+            migrationBuilder.DropTable(
+                name: "Freelancers");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

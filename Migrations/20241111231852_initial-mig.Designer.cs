@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AonFreelancing.Migrations
 {
     [DbContext(typeof(MainAppContext))]
-    [Migration("20241111165454_add-user-fullyregistered-field-mig")]
-    partial class adduserfullyregisteredfieldmig
+    [Migration("20241111231852_initial-mig")]
+    partial class initialmig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -119,6 +119,22 @@ namespace AonFreelancing.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("AonFreelancing.Models.TempUser", b =>
+                {
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PhoneNumber");
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
+
+                    b.ToTable("TempUsers", (string)null);
+                });
+
             modelBuilder.Entity("AonFreelancing.Models.User", b =>
                 {
                     b.Property<long>("Id")
@@ -137,9 +153,6 @@ namespace AonFreelancing.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("FullyRegistered")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("LockoutEnabled")
@@ -184,10 +197,6 @@ namespace AonFreelancing.Migrations
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex");
 
                     b.HasIndex("PhoneNumber")
                         .IsUnique();
@@ -331,10 +340,9 @@ namespace AonFreelancing.Migrations
 
             modelBuilder.Entity("AonFreelancing.Models.OTP", b =>
                 {
-                    b.HasOne("AonFreelancing.Models.User", null)
+                    b.HasOne("AonFreelancing.Models.TempUser", null)
                         .WithOne()
                         .HasForeignKey("AonFreelancing.Models.OTP", "PhoneNumber")
-                        .HasPrincipalKey("AonFreelancing.Models.User", "PhoneNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

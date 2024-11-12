@@ -20,6 +20,12 @@ namespace AonFreelancing
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            //// option configurations
+            //builder.Services.Configure<IdentityOptions>(options => {
+            //    options.User.AllowedUserNameCharacters += " ";
+            //});
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();

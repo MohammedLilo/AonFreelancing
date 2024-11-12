@@ -2,11 +2,11 @@
 
 namespace AonFreelancing.Models.Requests
 {
-    public class AuthRequest
+    public class LoginRequest
     {
         [Required]
-        [MinLength(4, ErrorMessage ="Invalid Username")]
-        public string UserName { get; set; }
+        [Length(14, 14)]
+        public string PhoneNumber { get; set; }
         [Required]
         [MinLength(6, ErrorMessage = "Invalid Password")]
         public string Password { get; set; }

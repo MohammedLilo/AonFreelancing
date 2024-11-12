@@ -116,6 +116,22 @@ namespace AonFreelancing.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("AonFreelancing.Models.TempUser", b =>
+                {
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PhoneNumber");
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique();
+
+                    b.ToTable("TempUsers", (string)null);
+                });
+
             modelBuilder.Entity("AonFreelancing.Models.User", b =>
                 {
                     b.Property<long>("Id")
@@ -134,9 +150,6 @@ namespace AonFreelancing.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("FullyRegistered")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("LockoutEnabled")
@@ -328,10 +341,9 @@ namespace AonFreelancing.Migrations
 
             modelBuilder.Entity("AonFreelancing.Models.OTP", b =>
                 {
-                    b.HasOne("AonFreelancing.Models.User", null)
+                    b.HasOne("AonFreelancing.Models.TempUser", null)
                         .WithOne()
                         .HasForeignKey("AonFreelancing.Models.OTP", "PhoneNumber")
-                        .HasPrincipalKey("AonFreelancing.Models.User", "PhoneNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -2,15 +2,15 @@
 
 namespace AonFreelancing.Models.Requests
 {
-    public class VerifyReq
+    public class VerifyPhoneNumberRequest
     {
 
         [Required]
         [Length(14,14)]
-        public string Phone {  get; set; }
+        public string PhoneNumber {  get; set; }
 
         [Required]
         [Length(6,6)]
-        public string Otp {  get; set; }
+        public string OtpCode {  get; set; }
     }
 }

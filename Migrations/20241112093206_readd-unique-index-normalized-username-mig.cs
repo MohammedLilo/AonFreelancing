@@ -5,24 +5,23 @@
 namespace AonFreelancing.Migrations
 {
     /// <inheritdoc />
-    public partial class adduserfullyregisteredfieldmig : Migration
+    public partial class readduniqueindexnormalizedusernamemig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "FullyRegistered",
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
                 table: "AspNetUsers",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: false);
+                column: "NormalizedUserName",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "FullyRegistered",
+            migrationBuilder.DropIndex(
+                name: "UserNameIndex",
                 table: "AspNetUsers");
         }
     }

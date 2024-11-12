@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Text;
 
 
 namespace AonFreelancing.Controllers.Mobile.v1
@@ -43,124 +44,94 @@ namespace AonFreelancing.Controllers.Mobile.v1
         }
 
         [HttpPost("register/phone-number")]
-        public async Task<IActionResult> RegisterWithPhoneNumberAsync([FromBody][Required][Phone] string phoneNumber)
+        public async Task<IActionResult> RegisterWithPhoneNumberAsync([FromBody] InitialUserRegistrationRequest initialRequest)
         {
-            if (await _userManager.Users.Where(u => u.PhoneNumber == phoneNumber).FirstOrDefaultAsync() != null)
+            if (await _mainAppContext.Users.Where(u => u.PhoneNumber == initialRequest.PhoneNumber).FirstOrDefaultAsync() != null)
                 return BadRequest(CreateErrorResponse(StatusCodes.Status400BadRequest.ToString(), "phone number is already used by an account"));
-
-            // Name and UserName are set to phoneNumber because currently it is the only unique value we have and they are required. 
-            User user = new User { PhoneNumber = phoneNumber, Name = phoneNumber,UserName = phoneNumber};
-            var userCreationResult = await _userManager.CreateAsync(user);
             
-            if (userCreationResult.Succeeded)
-            {
-                string otpCode = _otpManager.GenerateOtp();
-                OTP otp = new OTP(phoneNumber, otpCode, Convert.ToInt32(_configuration["Otp:ExpireInMinutes"]));
-                await _mainAppContext.OTPs.AddAsync(otp);
-                await _mainAppContext.SaveChangesAsync();
-
-                await _otpManager.SendOTPAsync(otpCode, phoneNumber);
- 
-                return StatusCode(
-                                   StatusCodes.Status201Created,
-                                   CreateSuccessResponse(new Dictionary<string, long> { { "id", user.Id } })
-                                  );
-            }
-            return StatusCode(
-                               StatusCodes.Status500InternalServerError,
-                               CreateErrorResponse("500", "An error occured while processing the request")
-                                );
-        }
-        [HttpPost("register/verify-phone-number")]
-        public async Task<IActionResult> VerifyAsync([FromBody] VerifyReq verifyReq)
-        {
-            var user = await _userManager.Users.Where(x => x.PhoneNumber == verifyReq.Phone).FirstOrDefaultAsync();
-            if (user != null && !await _userManager.IsPhoneNumberConfirmedAsync(user))
-            {
-                OTP? otp = await _mainAppContext.OTPs.Where(o => o.PhoneNumber == verifyReq.Phone).FirstOrDefaultAsync();
-
-                // verify OTP
-                if (otp != null && verifyReq.Otp.Equals(otp.Code) && DateTime.Now < otp.ExpiresAt)
-                {
-                    user.PhoneNumberConfirmed = true;
-                    await _userManager.UpdateAsync(user);
-
-                    // disable sent OTP
-                    otp.IsUsed = true;
-                    await _mainAppContext.SaveChangesAsync();
-
-                    return Ok(CreateSuccessResponse("Activated"));
-                }
-            }
-            return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized.ToString(), "UnAuthorized"));
-        }
-        [HttpPost("register/details")]
-        //TODO replace username with email
-        //TODO replace username with email
-        //TODO replace username with email
-        //TODO replace username with email
-        //TODO introduce a new property in User.cs to mark a user as fully registered
-        public async Task<IActionResult> CompleteRegister(UserRegistrationRequest regRequest)
-        {
-            User? user = await _userManager.FindByIdAsync(regRequest.UserId.ToString());
-            if (user == null)
-                return NotFound(CreateErrorResponse(StatusCodes.Status404NotFound.ToString(),"account not found"));
+            string otpCode = _otpManager.GenerateOtp();
+            OTP otp = new OTP(initialRequest.PhoneNumber, otpCode, Convert.ToInt32(_configuration["Otp:ExpireInMinutes"]));
             
-            //check if account has already completed registration.
-            if (user.FullyRegistered)
-                return BadRequest(CreateErrorResponse(StatusCodes.Status400BadRequest.ToString(),
-                                    "this account registration is already completed")
-                                    );
-            user.Email = regRequest.Email;
-            user.Name = regRequest.Name;
-            user.FullyRegistered = true;
-
-           var updatePasswordResult =  await _userManager.AddPasswordAsync(user,regRequest.Password);
-            if (!updatePasswordResult.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<object>()
-                {
-                    Errors = updatePasswordResult.Errors
-                    .Select(e => new Error()
-                    {
-                        Code = e.Code,
-                        Message = e.Description
-                    })
-                    .ToList()
-                });
-
-            var userUpdateResult =  await _userManager.UpdateAsync(user);
-            if (!userUpdateResult.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<object>()
-                {
-                    Errors = userUpdateResult.Errors
-                    .Select(e => new Error()
-                    {
-                        Code = e.Code,
-                        Message = e.Description
-                    })
-                    .ToList()
-                });
-            //this line is crucial for the current implementation, omitting it will cause System.InvalidOperationException: 'The instance of entity type 'Client' cannot be tracked because another instance with the key value '{Id: 15}' is already being tracked. When attaching existing entities, ensure that only one entity instance with a given key value is attached.'
-            _mainAppContext.Remove(user);
-
-            if (regRequest.UserType == Constants.USER_TYPE_FREELANCER)
-            {
-                user = new Freelancer(user) { Skills = regRequest.Skills };
-            }
-            else if (regRequest.UserType == Constants.USER_TYPE_CLIENT)
-            {
-                user = new Client(user) { CompanyName = regRequest.CompanyName };
-            }
-            await _mainAppContext.AddAsync(user);
+            await _mainAppContext.TempUsers.AddAsync(new TempUser(initialRequest.PhoneNumber));
+            await _mainAppContext.OTPs.AddAsync(otp);
             await _mainAppContext.SaveChangesAsync();
 
+            await _otpManager.SendOTPAsync(otpCode, initialRequest.PhoneNumber);
+
+            //include the expiration time in the response to display a count down.
+            return Ok(CreateSuccessResponse(otp.ExpiresAt));
+
+        }
+        [HttpPost("register/verify-phone-number")]
+        public async Task<IActionResult> VerifyAsync([FromBody] VerifyPhoneNumberRequest verifyPhoneNumberRequest)
+        {
+            TempUser? storedTempUser = await _mainAppContext.TempUsers.Where(tu => tu.PhoneNumber == verifyPhoneNumberRequest.PhoneNumber).FirstOrDefaultAsync();
+            if(storedTempUser == null)
+                return BadRequest(CreateErrorResponse(StatusCodes.Status400BadRequest.ToString(),"invalid phone number"));
+
+            OTP? otp = await _mainAppContext.OTPs.Where(o=>o.PhoneNumber == verifyPhoneNumberRequest.PhoneNumber).FirstOrDefaultAsync();
+
+
+            // verify OTP
+            if (otp != null && DateTime.Now < otp.ExpiresAt && !otp.IsUsed &&otp.Code.Equals(verifyPhoneNumberRequest.OtpCode))
+            {
+                storedTempUser.PhoneNumberConfirmed = true;
+                otp.IsUsed = true; // disable sent OTP
+                await _mainAppContext.SaveChangesAsync();
+
+                return Ok(CreateSuccessResponse("Activated"));
+            }
+
+            return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized.ToString(), "UnAuthorized"));
+        }
+
+        [HttpPost("register/details")]
+        public async Task<IActionResult> CompleteRegister(UserRegistrationRequest regRequest)
+        {
+            User? user = await _mainAppContext.Users.Where(u=>u.PhoneNumber == regRequest.PhoneNumber).FirstOrDefaultAsync();
+            if (user != null) //check if the provided phone number is already used.
+                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized.ToString(), "phone number is already used"));
+            
+            TempUser? storedTempUser = await _mainAppContext.TempUsers.Where(tu=>tu.PhoneNumber == regRequest.PhoneNumber).FirstOrDefaultAsync();
+            if(storedTempUser == null)//check if the request is associated with a temp user record.
+                return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized.ToString(), "submit and verify your phone number before registering your details"));
+
+
+            if (regRequest.UserType == Constants.USER_TYPE_FREELANCER) 
+                user = new Freelancer(regRequest);
+
+            else if (regRequest.UserType == Constants.USER_TYPE_CLIENT)
+                user = new Client(regRequest);
+
+            string normalizedName = StringUtils.ReplaceWhitespace(user.Name.ToLower(), "");
+            string username;
+            do
+            {
+                username =normalizedName + new Random().Next(999_999);
+            } while (await _mainAppContext.Users.AnyAsync(u => u.UserName == username));
+            
+            user.UserName = username;
+            user.PhoneNumberConfirmed = true;
+            var userCreationResult =  await _userManager.CreateAsync(user,regRequest.Password);
+            if (!userCreationResult.Succeeded)
+                return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse<object>()
+                {
+                    Errors = userCreationResult.Errors
+                    .Select(e => new Error()
+                    {
+                        Code = e.Code,
+                        Message = e.Description
+                    })
+                    .ToList()
+                });
+            
             var role = await _roleManager.FindByNameAsync(regRequest.UserType);
             await _userManager.AddToRoleAsync(user, role.Name);
 
             return CreatedAtAction(nameof(UsersController.GetProfileById), "Users", new { id = user.Id }, null);
         }
 
-        //[ApiExplorerSettings(IgnoreApi = true)] to hide it from swagger UI
+        [ApiExplorerSettings(IgnoreApi = true)]// to hide it only from swagger
         [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromBody] RegRequest regRequest)
         {
@@ -268,10 +239,10 @@ namespace AonFreelancing.Controllers.Mobile.v1
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync([FromBody] AuthRequest Req)
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest loginReq)
         {
-            var user = await _userManager.FindByNameAsync(Req.UserName);
-            if (user != null && await _userManager.CheckPasswordAsync(user, Req.Password))
+            var user = await _mainAppContext.Users.Where(u=>u.PhoneNumber == loginReq.PhoneNumber).FirstOrDefaultAsync();
+            if (user != null && await _userManager.CheckPasswordAsync(user, loginReq.Password))
             {
                 if (!await _userManager.IsPhoneNumberConfirmedAsync(user))
                     return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized.ToString(), "Verify Your Account First"));
