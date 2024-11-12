@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AonFreelancing.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 
 namespace AonFreelancing.Models.DTOs
@@ -6,23 +7,27 @@ namespace AonFreelancing.Models.DTOs
     public class ProjectInputDTO
     {
         [Required]
-        [MaxLength(512, ErrorMessage ="Length too long")]
+        [MaxLength(512, ErrorMessage ="Title is too long (greater than 512)")]
         public string Title { get; set; }
 
         [AllowNull]
-        public string Description { get; set; }
+        [MaxLength(1024,ErrorMessage = "Description is too long (greater than 1024")]
+        public string? Description { get; set; }
 
         [Required]
+        [AllowedValues(["Backend Developer", "Frontend Developer", "Mobile Developer", "UI/UX"])]
         public string QualificationName { get; set; }
 
         [Required]
+        [Range(1,int.MaxValue)]
         public int Duration { get; set; }//Number of days
 
         [Required]
-        [AllowedValues("PerHour","Fixed")]
+        [AllowedValues("PerHour","Fixed",ErrorMessage ="Price type must be one of the predefined values ('PerHour', 'Fixed')")]
         public string PriceType { get; set; }
 
         [Required]
+        [Range(0, int.MaxValue)]
         public decimal Budget { get; set; }
 
 

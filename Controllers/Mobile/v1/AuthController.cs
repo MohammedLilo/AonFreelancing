@@ -48,7 +48,10 @@ namespace AonFreelancing.Controllers.Mobile.v1
         {
             if (await _mainAppContext.Users.Where(u => u.PhoneNumber == initialRequest.PhoneNumber).FirstOrDefaultAsync() != null)
                 return BadRequest(CreateErrorResponse(StatusCodes.Status400BadRequest.ToString(), "phone number is already used by an account"));
-            
+           
+            if(await _mainAppContext.OTPs.Where(o=>o.PhoneNumber == initialRequest.PhoneNumber).FirstOrDefaultAsync() != null)
+                return BadRequest(CreateErrorResponse(StatusCodes.Status400BadRequest.ToString(), "otp is already sent"));
+
             string otpCode = _otpManager.GenerateOtp();
             OTP otp = new OTP(initialRequest.PhoneNumber, otpCode, Convert.ToInt32(_configuration["Otp:ExpireInMinutes"]));
             

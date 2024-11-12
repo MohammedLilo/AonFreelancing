@@ -14,7 +14,7 @@ namespace AonFreelancing.Models.DTOs
         public ProjectProfileDTO(Project project)
         {
             Id = project.Id;
-            Name = project.Name;
+            Name = project.Title;
             Description = project.Description;
             StartDate = project.StartDate;
             EndDate = project.EndDate;

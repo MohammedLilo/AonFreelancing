@@ -27,28 +27,19 @@ namespace AonFreelancing.Controllers.Mobile.v1
         }
 
 
-
-        [Authorize]
+        [Authorize(Roles = "Client")]
         [HttpPost]
-        public async Task<IActionResult> CreateProject([FromBody] ProjectInputDTO project)
+        public async Task<IActionResult> PostProject([FromBody] ProjectInputDTO projectInputDTO)
         {
-            var Username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var UserClient = await _userManager.FindByNameAsync(Username);
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            long clientId = Convert.ToInt64(identity.FindFirst(ClaimTypes.NameIdentifier).Value);
+            Project project = new Project(projectInputDTO, clientId);
 
-            Project p = new Project();
-            p.Name = project.Title;
-            p.Description = project.Description;
-            p.ClientId = UserClient.Id;
-            p.QualificationName = project.QualificationName;
-            p.Budget = project.Budget;
-            p.PriceType = project.PriceType;
-            p.Duration = project.Duration;
+            await _mainAppContext.Projects.AddAsync(project);
+            await _mainAppContext.SaveChangesAsync();
 
-            _mainAppContext.Projects.Add(p);
-            _mainAppContext.SaveChanges();
-            return Ok(CreateSuccessResponse(p));
+            return StatusCode(StatusCodes.Status201Created, CreateSuccessResponse("Success"));
         }
-
 
         //[HttpGet("{id}")]
         //public IActionResult GetProject(int id)

@@ -97,10 +97,6 @@ namespace AonFreelancing.Migrations
                     b.Property<long?>("FreelancerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("PriceType")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -112,13 +108,30 @@ namespace AonFreelancing.Migrations
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Available");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
 
                     b.HasIndex("FreelancerId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PRICE_TYPE", "[PriceType] IN ('Fixed', 'PerHour')");
+
+                            t.HasCheckConstraint("CK_QUALIFICATION_NAME", "[QualificationName] IN ('Backend Developer', 'Frontend Developer', 'Mobile Developer', 'UI/UX')");
+
+                            t.HasCheckConstraint("CK_STATUS", "[Status] IN ('Available', 'Closed')");
+                        });
                 });
 
             modelBuilder.Entity("AonFreelancing.Models.TempUser", b =>

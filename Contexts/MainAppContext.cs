@@ -1,4 +1,5 @@
-﻿using AonFreelancing.Models;
+﻿using AonFreelancing.Enums;
+using AonFreelancing.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
@@ -33,8 +34,15 @@ namespace AonFreelancing.Contexts
             
             builder.Entity<TempUser>().ToTable("TempUsers").HasIndex(u=>u.PhoneNumber).IsUnique();
 
-            //set up relationships
-            builder.Entity<TempUser>().HasOne<OTP>()
+            builder.Entity<Project>().ToTable("Projects", tb => tb.HasCheckConstraint("CK_PRICE_TYPE", "[PriceType] IN ('Fixed', 'PerHour')"));
+            builder.Entity<Project>().ToTable("Projects", tb => tb.HasCheckConstraint("CK_QUALIFICATION_NAME", "[QualificationName] IN ('Backend Developer', 'Frontend Developer', 'Mobile Developer', 'UI/UX')"));
+            builder.Entity<Project>().ToTable("Projects", tb => tb.HasCheckConstraint("CK_STATUS", "[Status] IN ('Available', 'Closed')"))
+                                                                .Property(p=>p.Status).HasDefaultValue("Available");
+
+
+
+//set up relationships
+builder.Entity<TempUser>().HasOne<OTP>()
                                     .WithOne()
                                     .HasForeignKey<OTP>()
                                     .HasPrincipalKey<TempUser>(nameof(TempUser.PhoneNumber));

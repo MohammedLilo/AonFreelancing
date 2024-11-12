@@ -1,4 +1,5 @@
 ﻿using AonFreelancing.Contexts;
+using AonFreelancing.Enums;
 using AonFreelancing.Models;
 using AonFreelancing.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AonFreelancing.Controllers.Mobile.v1
 {
@@ -15,15 +17,18 @@ namespace AonFreelancing.Controllers.Mobile.v1
     public class ClientsController : BaseController
     {
         //private readonly MainAppContext _mainAppContext;
-        //private readonly UserManager<User> _userManager;
+        ////private readonly UserManager<User> _userManager;
         //public ClientsController(
         //    MainAppContext mainAppContext,
         //    UserManager<User> userManager
         //    )
         //{
         //    _mainAppContext = mainAppContext;
-        //    _userManager = userManager;
+        //    //_userManager = userManager;
         //}
+
+       
+
 
         //[HttpGet]
         //public async Task<IActionResult> GetAllAsync([FromQuery] string? Mode)
