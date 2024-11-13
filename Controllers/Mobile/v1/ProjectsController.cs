@@ -1,11 +1,15 @@
 ﻿using AonFreelancing.Contexts;
 using AonFreelancing.Models;
 using AonFreelancing.Models.DTOs;
+using AonFreelancing.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations;
+using System.Numerics;
 using System.Security.Claims;
 
 namespace AonFreelancing.Controllers.Mobile.v1
@@ -42,10 +46,32 @@ namespace AonFreelancing.Controllers.Mobile.v1
         }
 
         [HttpGet("feed")]
-        public async Task<IActionResult> GetFeed(int pageSize, int pageNumber, string search_query, string qual)
+        public async Task<IActionResult> GetFeed([FromQuery] string search_query, [FromQuery] string[] qual, [FromQuery] int pageSize = 10, [FromQuery] int pageNumber = 0)
         {
-      
+            string normalizedSearchQuery = StringUtils.ReplaceWith(search_query.ToUpper(),"");
+            List<ProjectOutDTO> projects;
+            if (!qual.IsNullOrEmpty())
+            {
+                projects = await _mainAppContext.Projects.AsNoTracking().OrderByDescending(p => p.CreatedAt)//load newer projects first
+                                                 .Where(p => qual.Contains(p.QualificationName))//filter by qualifications
+                                                 .Where(p => p.NormalizedTitle.Contains(normalizedSearchQuery) || p.NormalizedDescription.Contains(normalizedSearchQuery))//search by name or description
+                                                 .Skip(pageNumber * pageSize)
+                                                 .Take(pageSize)
+                                                 .Select(p => new ProjectOutDTO(p))
+                                                 .ToListAsync();
+                return Ok(CreateSuccessResponse(projects));
+            }
+            else
+            {
+                projects = await _mainAppContext.Projects.AsNoTracking().OrderByDescending(p => p.CreatedAt)//load newer projects first
+                                                             .Where(p => p.NormalizedTitle.Contains(normalizedSearchQuery) || p.NormalizedDescription.Contains(normalizedSearchQuery))//search by name or description
+                                                             .Skip(pageNumber * pageSize)
+                                                             .Take(pageSize)
+                                                             .Select(p => new ProjectOutDTO(p))
+                                                             .ToListAsync();
+                return Ok(CreateSuccessResponse(projects));
 
+            }
 
 
 

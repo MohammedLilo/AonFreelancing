@@ -1,5 +1,6 @@
 ﻿using AonFreelancing.Enums;
 using AonFreelancing.Models.DTOs;
+using AonFreelancing.Utilities;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,9 +16,9 @@ namespace AonFreelancing.Models
         public int Id { get; set; }
 
         public string Title { get; set; }
-
+        public string NormalizedTitle {  get; set; }
         public string? Description { get; set; }
-
+        public string? NormalizedDescription {  get; set; }
         public long ClientId { get; set; }//FK
 
         // Belongs to a client
@@ -39,7 +40,7 @@ namespace AonFreelancing.Models
         public decimal Budget {  get; set; }
 
         public string Status { get; set; }//defaults to Available in the database
-
+        public string? ImageFileName {  get; set; }
         public long? FreelancerId { get; set; }
 
         [ForeignKey("FreelancerId")]
@@ -50,7 +51,9 @@ namespace AonFreelancing.Models
         {
             ClientId = clientId;
             Title = projectInputDTO.Title;
+            NormalizedTitle = StringUtils.ReplaceWith(projectInputDTO.Title.ToUpper(),"");
             Description = projectInputDTO.Description;
+            NormalizedDescription = StringUtils.ReplaceWith(projectInputDTO.Description.ToUpper(),"");
             CreatedAt = DateTime.Now;
             Duration = projectInputDTO.Duration;
             Budget = projectInputDTO.Budget;

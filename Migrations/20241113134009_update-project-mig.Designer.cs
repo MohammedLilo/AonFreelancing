@@ -3,6 +3,7 @@ using System;
 using AonFreelancing.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AonFreelancing.Migrations
 {
     [DbContext(typeof(MainAppContext))]
-    partial class MainAppContextModelSnapshot : ModelSnapshot
+    [Migration("20241113134009_update-project-mig")]
+    partial class updateprojectmig
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -97,9 +100,6 @@ namespace AonFreelancing.Migrations
                     b.Property<long?>("FreelancerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ImageFileName")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("NormalizedDescription")
                         .HasColumnType("TEXT");
 
@@ -138,7 +138,7 @@ namespace AonFreelancing.Migrations
                         {
                             t.HasCheckConstraint("CK_PRICE_TYPE", "[PriceType] IN ('Fixed', 'PerHour')");
 
-                            t.HasCheckConstraint("CK_QUALIFICATION_NAME", "[QualificationName] IN ('backend', 'frontend', 'mobile', 'uiux', 'fullstack')");
+                            t.HasCheckConstraint("CK_QUALIFICATION_NAME", "[QualificationName] IN ('Back-end', 'Front-end', 'Mobile', 'UIUX')");
 
                             t.HasCheckConstraint("CK_STATUS", "[Status] IN ('Available', 'Closed')");
                         });

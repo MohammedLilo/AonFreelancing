@@ -15,7 +15,7 @@ namespace AonFreelancing.Models.DTOs
         public string? Description { get; set; }
 
         [Required]
-        [AllowedValues(["Backend Developer", "Frontend Developer", "Mobile Developer", "UI/UX"])]
+        [AllowedValues(["backend", "frontend", "mobile", "uiux", "fullstack"])]
         public string QualificationName { get; set; }
 
         [Required]

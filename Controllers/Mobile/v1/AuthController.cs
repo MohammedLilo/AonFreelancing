@@ -106,7 +106,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
             else if (regRequest.UserType == Constants.USER_TYPE_CLIENT)
                 user = new Client(regRequest);
 
-            string normalizedName = StringUtils.ReplaceWhitespace(user.Name.ToLower(), "");
+            string normalizedName = StringUtils.ReplaceWith(user.Name.ToLower(), "");
             string username;
             do
             {

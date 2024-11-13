@@ -35,7 +35,7 @@ namespace AonFreelancing.Contexts
             builder.Entity<TempUser>().ToTable("TempUsers").HasIndex(u=>u.PhoneNumber).IsUnique();
 
             builder.Entity<Project>().ToTable("Projects", tb => tb.HasCheckConstraint("CK_PRICE_TYPE", "[PriceType] IN ('Fixed', 'PerHour')"));
-            builder.Entity<Project>().ToTable("Projects", tb => tb.HasCheckConstraint("CK_QUALIFICATION_NAME", "[QualificationName] IN ('Backend Developer', 'Frontend Developer', 'Mobile Developer', 'UI/UX')"));
+            builder.Entity<Project>().ToTable("Projects", tb => tb.HasCheckConstraint("CK_QUALIFICATION_NAME", "[QualificationName] IN ('backend', 'frontend', 'mobile', 'uiux', 'fullstack')"));
             builder.Entity<Project>().ToTable("Projects", tb => tb.HasCheckConstraint("CK_STATUS", "[Status] IN ('Available', 'Closed')"))
                                                                 .Property(p=>p.Status).HasDefaultValue("Available");
 
