@@ -19,14 +19,15 @@ namespace AonFreelancing.Models.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? StartDate {  get; set; }
         public DateTime? EndDate { get; set; }
-        
-        public ProjectOutDTO(Project project)
+
+        public ProjectOutDTO(Project project, string imageBaseUrl)
         {
             Title = project.Title;
             Description = project.Description;
             Status = project.Status;
             Budget = project.Budget;
-            Image = project.ImageFileName;
+            if (project.ImageFileName != null)
+                Image = $"{imageBaseUrl}/{project.ImageFileName}";
             Duration = project.Duration;
             PriceType = project.PriceType;
             Qualifications = project.QualificationName;

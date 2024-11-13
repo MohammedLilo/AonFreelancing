@@ -5,6 +5,7 @@ using AonFreelancing.Services;
 using AonFreelancing.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,9 +44,9 @@ namespace AonFreelancing.Controllers.Mobile.v1
             long clientId = Convert.ToInt64(identity.FindFirst(ClaimTypes.NameIdentifier).Value);
             Project project = new Project(projectInputDTO, clientId);
 
-            if (projectInputDTO.file != null)
+            if (projectInputDTO.ImageFile != null)
             {
-                string fileName = await _fileStorageService.SaveAsync(projectInputDTO.file);
+                string fileName = await _fileStorageService.SaveAsync(projectInputDTO.ImageFile);
                 project.ImageFileName = fileName;
             }
             await _mainAppContext.Projects.AddAsync(project);
@@ -53,10 +54,11 @@ namespace AonFreelancing.Controllers.Mobile.v1
 
             return StatusCode(StatusCodes.Status201Created, CreateSuccessResponse("Success"));
         }
-
+        
         [HttpGet("feed")]
-        public async Task<IActionResult> GetFeed([FromQuery] string search_query, [FromQuery] string[] qual, [FromQuery] int pageSize = 10, [FromQuery] int pageNumber = 0)
+        public async Task<IActionResult> GetFeed([FromQuery] string[] qual, [FromQuery] string search_query="", [FromQuery] int pageSize = 10, [FromQuery] int pageNumber = 0)
         {
+            var imagesBaseUrl = $"{Request.Scheme}://{Request.Host}/images";
             string normalizedSearchQuery = StringUtils.ReplaceWith(search_query.ToUpper(),"");
             List<ProjectOutDTO> projects;
             if (!qual.IsNullOrEmpty())
@@ -66,7 +68,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
                                                  .Where(p => p.NormalizedTitle.Contains(normalizedSearchQuery) || p.NormalizedDescription.Contains(normalizedSearchQuery))//search by name or description
                                                  .Skip(pageNumber * pageSize)
                                                  .Take(pageSize)
-                                                 .Select(p => new ProjectOutDTO(p))
+                                                 .Select(p => new ProjectOutDTO(p,imagesBaseUrl))
                                                  .ToListAsync();
             }
             else
@@ -75,7 +77,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
                                                              .Where(p => p.NormalizedTitle.Contains(normalizedSearchQuery) || p.NormalizedDescription.Contains(normalizedSearchQuery))//search by name or description
                                                              .Skip(pageNumber * pageSize)
                                                              .Take(pageSize)
-                                                             .Select(p => new ProjectOutDTO(p))
+                                                             .Select(p => new ProjectOutDTO(p, imagesBaseUrl))
                                                              .ToListAsync();
             }
             if(!projects.IsNullOrEmpty())

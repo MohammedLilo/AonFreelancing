@@ -4,11 +4,7 @@ namespace AonFreelancing.Services
 {
     public class FileStorageService
     {
-       public static readonly string ROOT = Path.Combine(Directory.GetCurrentDirectory(),"project-images");
-        public FileStorageService()
-        {
-           Directory.CreateDirectory(ROOT);
-        }
+       public static readonly string ROOT = Path.Combine(Directory.GetCurrentDirectory(),"uploads");
         
         public async Task<string> SaveAsync(IFormFile formFile)
         {

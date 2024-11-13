@@ -21,6 +21,7 @@ namespace AonFreelancing
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
 
             //// option configurations

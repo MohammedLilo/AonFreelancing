@@ -28,7 +28,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
         [HttpGet("{id}/profile")]
         public async Task<IActionResult> GetProfileById([FromRoute] long id)
         {
-            var freelancerProfileDTO = await _mainAppContext.Users.OfType<Freelancer>()
+            var freelancerProfileDTO = await _mainAppContext.Users.AsNoTracking().OfType<Freelancer>()
                                                                 .Where(f => f.Id == id)
                                                                 .Select(f => new FreelancerProfileDTO(f))
                                                                 .FirstOrDefaultAsync();
@@ -36,7 +36,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
                 return Ok(CreateSuccessResponse(freelancerProfileDTO));
 
 
-            var clientProfileDTO = await _mainAppContext.Users.OfType<Client>()
+            var clientProfileDTO = await _mainAppContext.Users.AsNoTracking().OfType<Client>()
                                                                 .Where(c => c.Id == id)
                                                                 .Include(c => c.Projects)
                                                                 .Select(c => new ClientProfileDTO(c))
