@@ -6,10 +6,13 @@ using AonFreelancing.Models;
 using AonFreelancing.Services;
 using AonFreelancing.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 namespace AonFreelancing
@@ -31,10 +34,37 @@ namespace AonFreelancing
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+
+            });
 
             builder.Services.AddSingleton<OTPManager>();
             builder.Services.AddSingleton<JwtService>();
+            builder.Services.AddSingleton<FileStorageService>();
             builder.Services.AddDbContext<MainAppContext>(options => options.UseSqlite("Data Source=aon.db"));
             builder.Services.AddIdentity<User,ApplicationRole>()
                 .AddEntityFrameworkStores<MainAppContext>()
@@ -68,7 +98,12 @@ namespace AonFreelancing
                 };
             });
 
-
+            builder.Services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
             var app = builder.Build();
             
             //seed roles to the database
@@ -93,6 +128,11 @@ namespace AonFreelancing
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(FileStorageService.ROOT),
+                RequestPath = "/images"
+            });
 
             app.MapControllers();
 

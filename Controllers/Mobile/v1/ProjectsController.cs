@@ -1,6 +1,7 @@
 ﻿using AonFreelancing.Contexts;
 using AonFreelancing.Models;
 using AonFreelancing.Models.DTOs;
+using AonFreelancing.Services;
 using AonFreelancing.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -21,24 +22,32 @@ namespace AonFreelancing.Controllers.Mobile.v1
     {
         private readonly MainAppContext _mainAppContext;
         private readonly UserManager<User> _userManager;
+        readonly FileStorageService _fileStorageService;
         public ProjectsController(
             MainAppContext mainAppContext,
-            UserManager<User> userManager
+            UserManager<User> userManager,
+            FileStorageService fileStorageService
             )
         {
             _mainAppContext = mainAppContext;
             _userManager = userManager;
+            _fileStorageService = fileStorageService;
         }
 
 
         [Authorize(Roles = "Client")]
         [HttpPost]
-        public async Task<IActionResult> PostProject([FromBody] ProjectInputDTO projectInputDTO)
+        public async Task<IActionResult> PostProject( ProjectInputDTO projectInputDTO)
         {
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             long clientId = Convert.ToInt64(identity.FindFirst(ClaimTypes.NameIdentifier).Value);
             Project project = new Project(projectInputDTO, clientId);
 
+            if (projectInputDTO.file != null)
+            {
+                string fileName = await _fileStorageService.SaveAsync(projectInputDTO.file);
+                project.ImageFileName = fileName;
+            }
             await _mainAppContext.Projects.AddAsync(project);
             await _mainAppContext.SaveChangesAsync();
 
@@ -59,7 +68,6 @@ namespace AonFreelancing.Controllers.Mobile.v1
                                                  .Take(pageSize)
                                                  .Select(p => new ProjectOutDTO(p))
                                                  .ToListAsync();
-                return Ok(CreateSuccessResponse(projects));
             }
             else
             {
@@ -69,14 +77,13 @@ namespace AonFreelancing.Controllers.Mobile.v1
                                                              .Take(pageSize)
                                                              .Select(p => new ProjectOutDTO(p))
                                                              .ToListAsync();
-                return Ok(CreateSuccessResponse(projects));
-
             }
-
-
-
-            return Ok();
+            if(!projects.IsNullOrEmpty())
+                return Ok(CreateSuccessResponse(projects));
+            
+            return NotFound(CreateErrorResponse(StatusCodes.Status404NotFound.ToString(), "No projects where found"));
         }
+
 
         //[HttpGet("{id}")]
         //public IActionResult GetProject(int id)

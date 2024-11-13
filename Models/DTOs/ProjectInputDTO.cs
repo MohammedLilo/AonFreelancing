@@ -30,6 +30,6 @@ namespace AonFreelancing.Models.DTOs
         [Range(0, int.MaxValue)]
         public decimal Budget { get; set; }
 
-
+       public  IFormFile? file {  get; set; }
     }
 }

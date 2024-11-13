@@ -5,6 +5,7 @@ using AonFreelancing.Models.Requests;
 using AonFreelancing.Models.Responses;
 using AonFreelancing.Services;
 using AonFreelancing.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
 using Microsoft.AspNetCore.Mvc;
@@ -42,7 +43,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
             _otpManager = otpManager;
             _jwtService = jwtService;
         }
-
+        [AllowAnonymous]
         [HttpPost("register/phone-number")]
         public async Task<IActionResult> RegisterWithPhoneNumberAsync([FromBody] InitialUserRegistrationRequest initialRequest)
         {
@@ -65,6 +66,8 @@ namespace AonFreelancing.Controllers.Mobile.v1
             return Ok(CreateSuccessResponse(otp.ExpiresAt));
 
         }
+
+        [AllowAnonymous]
         [HttpPost("register/verify-phone-number")]
         public async Task<IActionResult> VerifyAsync([FromBody] VerifyPhoneNumberRequest verifyPhoneNumberRequest)
         {
@@ -88,6 +91,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
             return Unauthorized(CreateErrorResponse(StatusCodes.Status401Unauthorized.ToString(), "UnAuthorized"));
         }
 
+        [AllowAnonymous]
         [HttpPost("register/details")]
         public async Task<IActionResult> CompleteRegister(UserRegistrationRequest regRequest)
         {
@@ -135,6 +139,7 @@ namespace AonFreelancing.Controllers.Mobile.v1
             return CreatedAtAction(nameof(UsersController.GetProfileById), "Users", new { id = user.Id }, null);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromBody] LoginRequest loginReq)
         {

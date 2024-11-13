@@ -26,7 +26,7 @@ namespace AonFreelancing.Models.DTOs
             Description = project.Description;
             Status = project.Status;
             Budget = project.Budget;
-            //Image = project.image;
+            Image = project.ImageFileName;
             Duration = project.Duration;
             PriceType = project.PriceType;
             Qualifications = project.QualificationName;
