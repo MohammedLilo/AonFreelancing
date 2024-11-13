@@ -41,6 +41,17 @@ namespace AonFreelancing.Controllers.Mobile.v1
             return StatusCode(StatusCodes.Status201Created, CreateSuccessResponse("Success"));
         }
 
+        [HttpGet("feed")]
+        public async Task<IActionResult> GetFeed(int pageSize, int pageNumber, string search_query, string qual)
+        {
+      
+
+
+
+
+            return Ok();
+        }
+
         //[HttpGet("{id}")]
         //public IActionResult GetProject(int id)
         //{

@@ -130,7 +130,8 @@ namespace AonFreelancing.Controllers.Mobile.v1
             
             var role = await _roleManager.FindByNameAsync(regRequest.UserType);
             await _userManager.AddToRoleAsync(user, role.Name);
-
+            _mainAppContext.Remove(storedTempUser);
+            await _mainAppContext.SaveChangesAsync();
             return CreatedAtAction(nameof(UsersController.GetProfileById), "Users", new { id = user.Id }, null);
         }
 
